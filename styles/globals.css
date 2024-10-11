@@ -17,11 +17,11 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  /* font-family: Helvetica, sans-serif; */
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .text-13 {
+    font-size: 13px;
   }
 }
