@@ -30,20 +30,20 @@ export default function Home() {
   }, [])
 
   return (
-    <main className="sm:p-16 pb-4 pt-16 bg-zinc-950 text-zinc-100 min-h-screen">
+    <main className="sm:p-16 pb-4 pt-16 min-h-screen">
       <div className="w-fit mx-auto max-container-width">
         <div className="flex items-end mb-8">
           <h1 className="text-2xl font-medium flex items-center -mb-05">
             <Server size={"1em"} className="mr-2" />
             <span>My Servers</span>
           </h1>
-          <span className="text-13 text-zinc-400 ml-4">最近更新：{data ? updatedAt(parseInt(data.updated)) : updatedAt(0)}</span>
+          <span className="text-13 text-zinc-400 ml-4">
+            最近更新：{data ? updatedAt(parseInt(data.updated)) : updatedAt(0)}
+          </span>
         </div>
         {err && <div className="container bg-red-500 bg-opacity-20 p-4 rounded-2xl border border-red-500 border-opacity-40">
           <span className="text-red-600">错误：</span>
-          <span className="text-zinc-300">
-            {err}
-          </span>
+          <span className="text-zinc-300">{err}</span>
         </div>}
         {!err && data?.servers && data.servers.map((d, i) => {
           return <ServerCard server={d} key={i} />
@@ -80,7 +80,7 @@ function ServerCard(props: {
         {server.name}
       </div>
     </div>
-    {/* content pb-2 for scrollbar*/}
+    {/* content */}
     <div className="flex mt-4 overflow-x-auto scrollbar">
       {/* col1 */}
       <div className="flex-none flex flex-col">
@@ -126,70 +126,73 @@ function ServerCard(props: {
       <div className="flex-none grid grid-cols-4-auto grid-rows-2 grid-flow-col auto-cols-min gap-x-8 ml-8">
         {/* network */}
         <div className="row-span-2">
-          <div className="font-semibold text-lg text-zinc-100 mb-4">网络</div>
+          <div className="font-semibold text-lg text-zinc-100 mb-4">
+            网络
+          </div>
           <div className="text-sm text-zinc-500">
-            <div>上行</div>
-            <div className="mt-1 flex items-center"><ArrowUp className="stroke-white mr-1" size={"1em"} />
-              {d.netUp ? <><span className="mr-1 text-zinc-300">{d.netUp.value}</span>{d.netUp.unit}</> : "-"}/s
-            </div>
-            <div className="mt-4">下行</div>
-            <div className="mt-1 flex items-center"><ArrowDown className="stroke-white mr-1" size={"1em"} />
-              {d.netDown ? <><span className="mr-1 text-zinc-300">{d.netDown.value}</span>{d.netDown.unit}</> : "-"}/s
-            </div>
+            {([
+              ["上行", d.netUp],
+              ["下行", d.netDown]
+            ] as const).map(([name, data]) => (
+
+              <div className="last:mt-4">
+                <div>{name}</div>
+                <div className="mt-1 flex items-center">
+                  <ArrowUp className="stroke-white mr-1" size={"1em"} />
+                  {data ? <><span className="mr-1 text-zinc-300">{data.value}</span>{data.unit}</> : "-"}/s
+                </div>
+              </div>
+
+            ))}
           </div>
         </div>
         {/* delay */}
         <div className="row-span-2">
-          <div className="font-semibold text-lg text-zinc-100 mb-4">延迟/丢包</div>
+          <div className="font-semibold text-lg text-zinc-100 mb-4">
+            延迟/丢包
+          </div>
           <div className="grid grid-cols-5-auto grid-rows-3 text-zinc-500 text-sm gap-y-1">
-            <div>电信</div>
-            <div className={"ml-2 text-right mr-1 " + delayColor(server.time_189)}>{server.time_189}</div>ms
-            <div className={"ml-2 text-right " + lossColor(server.ping_189)}>{server.ping_189}</div>%
-
-            <div>移动</div>
-            <div className={"ml-2 text-right mr-1 " + delayColor(server.time_10086)}>{server.time_10086}</div>ms
-            <div className={"ml-2 text-right " + lossColor(server.ping_10086)}>{server.ping_10086}</div>%
-
-            <div>联通</div>
-            <div className={"ml-2 text-right mr-1 " + delayColor(server.time_10010)}>{server.time_10010}</div>ms
-            <div className={"ml-2 text-right " + lossColor(server.ping_10010)}>{server.ping_10010}</div>%
+            {
+              ([
+                ["电信", server.time_189, server.ping_189],
+                ["移动", server.time_10086, server.ping_10086],
+                ["联通", server.time_10010, server.ping_10010],
+              ] as const).map(([name, delay, loss]) => (
+                <>
+                  <div>{name}</div>
+                  <div className={"ml-2 text-right mr-1 " + delayColor(delay)}>{delay}</div>ms
+                  <div className={"ml-2 text-right " + lossColor(loss)}>{loss}</div>%
+                </>
+              ))
+            }
           </div>
         </div>
         {/* traffic */}
-        <div className="row-span-2">
-          <div className="font-semibold text-lg text-zinc-100 mb-4">月流量</div>
-          <div className="mt-1 flex items-center text-sm">
-            <ArrowUp className="stroke-white mr-1" size={"1em"} />
-            <div>
-              {d.netMonthUp ? d.netMonthUp.value : "--"}
-              <span className="text-zinc-500 ml-1">{d.netMonthUp?.unit}</span>
-            </div>
+        {([
+          ["月流量", d.netMonthUp, d.netMonthDown],
+          ["总流量", d.netTotalUp, d.netTotalDown]
+        ] as const).map(([name, up, down]) => (
+
+          <div className="row-span-2">
+            <div className="font-semibold text-lg text-zinc-100 mb-4">{name}</div>
+            {([
+              [up, <ArrowUp className="stroke-white mr-1" size={"1em"} />],
+              [down, <ArrowDown className="stroke-white mr-1" size={"1em"} />]
+            ] as const).map(([data, Icon]) => (
+
+              <div className="mt-1 flex items-center text-sm">
+                {Icon}
+                <div>
+                  {data ? data.value : "--"}
+                  <span className="text-zinc-500 ml-1">{up?.unit}</span>
+                </div>
+              </div>
+
+            ))}
           </div>
-          <div className="mt-1 flex items-center text-sm">
-            <ArrowDown className="stroke-white mr-1" size={"1em"} />
-            <div>
-              {d.netMonthDown ? d.netMonthDown.value : "--"}
-              <span className="text-zinc-500 ml-1">{d.netMonthDown?.unit}</span>
-            </div>
-          </div>
-        </div>
-        <div className="row-span-2">
-          <div className="font-semibold text-lg text-zinc-100 mb-4">总流量</div>
-          <div className="mt-1 flex items-center text-sm">
-            <ArrowUp className="stroke-white mr-1" size={"1em"} />
-            <div>
-              {d.netTotalUp ? d.netTotalUp.value : "--"}
-              <span className="text-zinc-500 ml-1">{d.netTotalUp?.unit}</span>
-            </div>
-          </div>
-          <div className="mt-1 flex items-center text-sm">
-            <ArrowDown className="stroke-white mr-1" size={"1em"} />
-            <div>
-              {d.netTotalDown ? d.netTotalDown.value : "--"}
-              <span className="text-zinc-500 ml-1">{d.netTotalDown?.unit}</span>
-            </div>
-          </div>
-        </div>
+
+        ))}
+
       </div>
     </div>
   </div>
