@@ -25,6 +25,10 @@ body {
     font-size: 13px;
   }
 
+  .-mb-05 {
+    margin-bottom: -0.125rem;
+  }
+
   .grid-cols-4-auto {
     grid-template-columns: repeat(4, auto);
   }

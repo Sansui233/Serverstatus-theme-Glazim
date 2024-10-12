@@ -1,8 +1,8 @@
 import { CircleChart, TextBrText } from "@/components/charts"
 import { parseServer } from "@/utils/parse"
 import { TServersEntity, TStat } from "@/utils/type"
-import { ArrowDown, ArrowUp, Cloudy } from "lucide-react"
-import { useEffect, useState } from "react"
+import { ArrowDown, ArrowUp, Server } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
 
 // TODO 双列布局切换
 // TODO 其他主题切换
@@ -22,13 +22,23 @@ export default function Home() {
       })
   }, [])
 
+  const updatedAt = useCallback((date: number) => {
+    if (date == 0) return "从未.";
+    var seconds = Math.floor(((new Date()).getTime() - 1000 * date) / 1000);
+    var interval = Math.floor(seconds / 60);
+    return interval > 1 ? interval + " 分钟前" : "几秒前";
+  }, [])
+
   return (
-    <main className="sm:p-16 p-4 bg-zinc-950 text-zinc-100 min-h-screen">
+    <main className="sm:p-16 pb-4 pt-16 bg-zinc-950 text-zinc-100 min-h-screen">
       <div className="w-fit mx-auto max-container-width">
-        <h1 className="text-4xl font-semibold mb-8 flex">
-          <Cloudy size={"1em"} className="mr-2" />
-          <span>云监控</span>
-        </h1>
+        <div className="flex items-end mb-8">
+          <h1 className="text-2xl font-medium flex items-center -mb-05">
+            <Server size={"1em"} className="mr-2" />
+            <span>My Servers</span>
+          </h1>
+          <span className="text-13 text-zinc-400 ml-4">最近更新：{data ? updatedAt(parseInt(data.updated)) : updatedAt(0)}</span>
+        </div>
         {err && <div className="container bg-red-500 bg-opacity-20 p-4 rounded-2xl border border-red-500 border-opacity-40">
           <span className="text-red-600">错误：</span>
           <span className="text-zinc-300">
