@@ -29,7 +29,12 @@ export default function Home() {
           <Cloudy size={"1em"} className="mr-2" />
           <span>云监控</span>
         </h1>
-        {err && <div className="container">{err}</div>}
+        {err && <div className="container bg-red-500 bg-opacity-20 p-4 rounded-2xl border border-red-500 border-opacity-40">
+          <span className="text-red-600">错误：</span>
+          <span className="text-zinc-300">
+            {err}
+          </span>
+        </div>}
         {!err && data?.servers && data.servers.map((d, i) => {
           return <ServerCard server={d} key={i} />
         })}
