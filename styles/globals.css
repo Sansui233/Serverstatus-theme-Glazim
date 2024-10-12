@@ -32,6 +32,7 @@ body {
   .grid-cols-4-auto {
     grid-template-columns: repeat(4, auto);
   }
+
   .grid-cols-5-auto {
     grid-template-columns: repeat(5, auto);
   }
@@ -55,10 +56,23 @@ body {
     background: #ffffff20;
   }
 
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
   .max-container-width {
     @media (min-width: 640px) {
       max-width: calc(100vw - 4rem);
     }
+
     max-width: calc(100vw - 2rem);
   }
 }

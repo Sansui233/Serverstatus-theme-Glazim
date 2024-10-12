@@ -1,8 +1,9 @@
 import { CircleChart, TextBrText } from "@/components/charts"
 import { parseServer } from "@/utils/parse"
+import { throttle } from "@/utils/throttle"
 import { TServersEntity, TStat } from "@/utils/type"
 import { ArrowDown, ArrowUp, Server } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 
 // TODO 双列布局切换
 // TODO 其他主题切换
@@ -12,6 +13,8 @@ export default function Home() {
 
   const [data, setData] = useState<TStat | null>(null)
   const [err, setErr] = useState(null)
+  const refs = useRef<(HTMLDivElement | undefined | null)[]>([null, null, null])
+
   useEffect(() => {
     fetch("/json/stats.json")
       .then(resp => resp.json())
@@ -45,9 +48,13 @@ export default function Home() {
           <span className="text-red-600">错误：</span>
           <span className="text-zinc-300">{err}</span>
         </div>}
-        {!err && data?.servers && data.servers.map((d, i) => {
-          return <ServerCard server={d} key={i} />
-        })}
+        <div>
+          {!err && data?.servers && data.servers.map((d, i) => {
+            return <ServerCard server={d} key={i} idx={i}
+              reflist={refs}
+            />
+          })}
+        </div>
       </div>
     </main>
   );
@@ -65,12 +72,91 @@ const delayColor = (delay: number | null | undefined) => getColorclass(delay, 10
 const lossColor = (loss: number | null | undefined) => getColorclass(loss, 10, 20)
 
 
+
+const syncScroll = (
+  sourcedom: HTMLDivElement,
+  refList: React.MutableRefObject<(HTMLDivElement | undefined | null)[]>,
+  // idx?: number // debug 用
+) => {
+  const scrollLeft = sourcedom.scrollLeft;
+
+  refList.current && refList.current.forEach((dom) => {
+    if (dom && dom !== sourcedom && dom.scrollLeft !== scrollLeft) {
+      dom.scrollLeft = scrollLeft;
+      console.debug("%% send in sync")
+    }
+  });
+};
+
+
+
 function ServerCard(props: {
-  server: TServersEntity
+  server: TServersEntity,
+  idx: number,
+  reflist: React.MutableRefObject<(HTMLDivElement | undefined | null)[]>
 } & React.HTMLAttributes<HTMLDivElement>) {
 
-  const { server, ...otherProps } = props
+  const { server, idx, reflist, ...otherProps } = props
   const d = parseServer(server)
+  const isMouseInside = useRef(false);
+
+  // 竖向变横向的主动 scroll
+  useEffect(() => {
+
+    const dom = reflist && reflist.current[idx] ? reflist.current[idx] : null;
+    if (!dom) return
+
+    const handleMouseEnter = () => { isMouseInside.current = true };
+    const handleMouseLeave = () => { isMouseInside.current = false };
+    if (dom) {
+      dom.addEventListener('mouseenter', handleMouseEnter);
+      dom.addEventListener('mouseleave', handleMouseLeave);
+    }
+
+    // Wheel 触发的单个元素 scroll
+    const throttledScrollX = throttle((dom: HTMLDivElement, distance: number) => {
+      // setScrollLeft(dom.scrollLeft + distance)
+      dom.scrollLeft = dom.scrollLeft + distance
+      console.debug('&& debug sending', idx)
+    }, 100)
+    const handleWheel = throttle((e: WheelEvent) => {
+      if (dom && isMouseInside.current) {
+        if ((e.deltaY < 0 && dom.scrollLeft > 0)
+          || (e.deltaY > 0 && dom.scrollLeft + dom.clientWidth < dom.scrollWidth)
+        ) {
+          e.preventDefault()
+          throttledScrollX(dom, e.deltaY)
+        }
+      }
+    }, 5)
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      window.removeEventListener("wheel", handleWheel)
+      dom && dom.removeEventListener('mouseenter', handleMouseEnter);
+      dom && dom.removeEventListener('mouseleave', handleMouseLeave);
+    }
+  }, [reflist])
+
+  // 被动 scroll 与 scroll 扩散
+  // 其实这里是有可能和后面的事件监听无限制循环 trigger 的，设备越差越会有
+  // 但由于滑动无法确定最早滑动的源，触发方式太多了，最后是通过 throttle 来减轻的
+  useEffect(() => {
+    const dom = reflist && reflist.current[idx] ? reflist.current[idx] : null;
+    if (!dom) return
+
+    const handleScroll = () => {
+      // console.debug('&& debug receiving', idx)
+      requestAnimationFrame(() => syncScroll(dom, reflist))
+
+    }
+    const throttled = throttle(handleScroll, 33)
+    dom.addEventListener('scroll', throttled)
+
+    return () => {
+      dom.removeEventListener('scroll', throttled)
+    }
+
+  }, [reflist, idx])
 
   return <div {...otherProps} className="rounded-2xl bg-zinc-900 px-6 py-4 my-4 min-h-16">
     {/* title */}
@@ -81,7 +167,7 @@ function ServerCard(props: {
       </div>
     </div>
     {/* content */}
-    <div className="flex mt-4 overflow-x-auto scrollbar">
+    <div ref={dom => { reflist.current[idx] = dom }} className="flex mt-4 overflow-x-auto scrollbar">
       {/* col1 */}
       <div className="flex-none flex flex-col">
         <div className="flex">
@@ -131,14 +217,14 @@ function ServerCard(props: {
           </div>
           <div className="text-sm text-zinc-500">
             {([
-              ["上行", d.netUp],
-              ["下行", d.netDown]
-            ] as const).map(([name, data]) => (
+              ["上行", d.netUp, <ArrowUp className="stroke-white mr-1" size={"1em"} />],
+              ["下行", d.netDown, <ArrowDown className="stroke-white mr-1" size={"1em"} />]
+            ] as const).map(([name, data, Icon], i) => (
 
-              <div className="last:mt-4">
+              <div className="last:mt-4" key={i}>
                 <div>{name}</div>
                 <div className="mt-1 flex items-center">
-                  <ArrowUp className="stroke-white mr-1" size={"1em"} />
+                  {Icon}
                   {data ? <><span className="mr-1 text-zinc-300">{data.value}</span>{data.unit}</> : "-"}/s
                 </div>
               </div>
@@ -157,12 +243,12 @@ function ServerCard(props: {
                 ["电信", server.time_189, server.ping_189],
                 ["移动", server.time_10086, server.ping_10086],
                 ["联通", server.time_10010, server.ping_10010],
-              ] as const).map(([name, delay, loss]) => (
-                <>
-                  <div>{name}</div>
+              ] as const).map(([name, delay, loss], i) => (
+                <React.Fragment key={i}>
+                  <div >{name}</div>
                   <div className={"ml-2 text-right mr-1 " + delayColor(delay)}>{delay}</div>ms
                   <div className={"ml-2 text-right " + lossColor(loss)}>{loss}</div>%
-                </>
+                </React.Fragment>
               ))
             }
           </div>
@@ -171,16 +257,16 @@ function ServerCard(props: {
         {([
           ["月流量", d.netMonthUp, d.netMonthDown],
           ["总流量", d.netTotalUp, d.netTotalDown]
-        ] as const).map(([name, up, down]) => (
+        ] as const).map(([name, up, down], i) => (
 
-          <div className="row-span-2">
+          <div className="row-span-2" key={i}>
             <div className="font-semibold text-lg text-zinc-100 mb-4">{name}</div>
             {([
               [up, <ArrowUp className="stroke-white mr-1" size={"1em"} />],
               [down, <ArrowDown className="stroke-white mr-1" size={"1em"} />]
-            ] as const).map(([data, Icon]) => (
+            ] as const).map(([data, Icon], i) => (
 
-              <div className="mt-1 flex items-center text-sm">
+              <div className="mt-1 flex items-center text-sm" key={i}>
                 {Icon}
                 <div>
                   {data ? data.value : "--"}
