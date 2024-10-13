@@ -3,16 +3,16 @@ import SVGCircle from "./svgs/circle";
 
 export function TextBrText(props: {
   title: string,
-  value: string,
+  value?: string,
   unit?: string,
 }) {
-  return <div>
-    <div className="text-13 text-zinc-400 mr-12 mb-2" style={{ marginBottom: "2px" }}>
+  return <div className="text-zinc-400">
+    <div className="text-13 mr-12 mb-2" style={{ marginBottom: "2px" }}>
       {props.title}
     </div>
     <div>
-      {props.value}
-      <span className="text-13 text-zinc-400 ml-1">{props.unit}</span>
+      {props.value ? <span className="text-zinc-100">{props.value}</span> : '--'}
+      <span className="text-13 ml-1">{props.unit}</span>
     </div>
 
   </div>

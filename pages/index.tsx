@@ -18,6 +18,7 @@ export default function Home() {
   useEffect(() => {
 
     const getData = () => {
+      console.debug("fetch data...")
       fetch("/json/stats.json")
         .then(resp => resp.json())
         .then(data => {
@@ -173,13 +174,14 @@ function ServerCard(props: {
   return <div {...otherProps} className="rounded-2xl bg-zinc-900 px-6 py-4 my-4 min-h-16">
     {/* title */}
     <div className="flex items-center">
-      <div className={"inline-block rounded-full w-2 h-2 mr-2" + (d.protocol !== "--" ? " bg-green-500" : " bg-red-600")} />
+      <div className={"inline-block rounded-full w-2 h-2 mr-2" + (d.protocol ? " bg-green-500" : " bg-red-600")} />
       <div className="font-bold">
         {server.name}
       </div>
+      {!d.protocol && <span className="ml-4 px-2 rounded-full text-13 bg-red-950 border border-red-900 text-red-400">离线</span>}
     </div>
     {/* content */}
-    <div ref={dom => { reflist.current[idx] = dom }} className="flex mt-4 overflow-x-auto scrollbar">
+    <div ref={dom => { reflist.current[idx] = dom }} className="flex mt-4 ml-4 overflow-x-auto scrollbar">
       {/* col1 */}
       <div className="flex-none flex flex-col">
         <div className="flex">
@@ -188,9 +190,9 @@ function ServerCard(props: {
           <TextBrText title="位置" value={server.location} />
           <TextBrText title="在线天数"
             value={server.uptime ? server.uptime.split(" ")[0] : ""}
-            unit={server.uptime ? "天" : "--"} />
+            unit={server.uptime ? "天" : ""} />
         </div>
-        <div className="flex">
+        {d.protocol && <div className="flex">
           <CircleChart
             name="CPU"
             value={d.cpuUsage}
@@ -218,10 +220,10 @@ function ServerCard(props: {
               : "- / -"
             }
           />
-        </div>
+        </div>}
       </div>
       {/* col2 */}
-      <div className="flex-none grid grid-cols-4-auto grid-rows-2 grid-flow-col auto-cols-min gap-x-8 ml-8">
+      {d.protocol && <div className="flex-none grid grid-cols-4-auto grid-rows-2 grid-flow-col auto-cols-min gap-x-8 ml-8">
         {/* network */}
         <div className="row-span-2">
           <div className="font-semibold text-lg text-zinc-100 mb-4">
@@ -229,15 +231,15 @@ function ServerCard(props: {
           </div>
           <div className="text-sm text-zinc-500">
             {([
-              ["上行", d.netUp, <ArrowUp key={"aru"} className="stroke-white mr-1" size={"1em"} />],
-              ["下行", d.netDown, <ArrowDown key={"ard"} className="stroke-white mr-1" size={"1em"} />]
+              ["上行速度", d.netUp, <ArrowUp key={"aru"} className="stroke-white mr-1" size={"1em"} />],
+              ["下行速度", d.netDown, <ArrowDown key={"ard"} className="stroke-white mr-1" size={"1em"} />]
             ] as const).map(([name, data, Icon], i) => (
 
               <div className="last:mt-4" key={i}>
                 <div>{name}</div>
                 <div className="mt-1 flex items-center">
                   {Icon}
-                  {data ? <><span className="mr-1 text-zinc-300">{data.value}</span>{data.unit}</> : "-"}/s
+                  {data ? <><span className="mr-1 text-zinc-300 inline-block text-right min-w-4ch">{data.value}</span>{data.unit}</> : "-"}/s
                 </div>
               </div>
 
@@ -258,8 +260,8 @@ function ServerCard(props: {
               ] as const).map(([name, delay, loss], i) => (
                 <React.Fragment key={i}>
                   <div >{name}</div>
-                  <div className={"ml-2 text-right mr-1 " + delayColor(delay)}>{delay}</div>ms
-                  <div className={"ml-2 text-right " + lossColor(loss)}>{loss}</div>%
+                  <div className={"ml-2 text-right mr-1 min-w-4ch " + delayColor(delay)}>{delay}</div>ms
+                  <div className={"ml-2 text-right min-w-3ch " + lossColor(loss)}>{loss}</div>%
                 </React.Fragment>
               ))
             }
@@ -281,7 +283,7 @@ function ServerCard(props: {
               <div className="mt-1 flex items-center text-sm" key={i}>
                 {Icon}
                 <div>
-                  {data ? data.value : "--"}
+                  <span className="inline-block text-right min-w-3ch">{data ? data.value : "--"}</span>
                   <span className="text-zinc-500 ml-1">{up?.unit}</span>
                 </div>
               </div>
@@ -291,7 +293,7 @@ function ServerCard(props: {
 
         ))}
 
-      </div>
+      </div>}
     </div>
   </div>
 }

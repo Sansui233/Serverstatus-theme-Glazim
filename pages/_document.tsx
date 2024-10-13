@@ -6,7 +6,7 @@ export default function Document() {
       <Head>
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
       </Head>
-      <body className="antialiased bg-zinc-950  text-zinc-100 ">
+      <body className="antialiased bg-zinc-950  text-zinc-100 tabular-nums">
         <Main />
         <NextScript />
       </body>

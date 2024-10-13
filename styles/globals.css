@@ -29,6 +29,22 @@ body {
     margin-bottom: -0.125rem;
   }
 
+  .min-w-2ch {
+    min-width: 2ch;
+  }
+
+  .min-w-3ch {
+    min-width: 3ch;
+  }
+
+  .min-w-4ch {
+    min-width: 4ch;
+  }
+
+  .min-w-5ch {
+    min-width: 5ch;
+  }
+
   .grid-cols-4-auto {
     grid-template-columns: repeat(4, auto);
   }

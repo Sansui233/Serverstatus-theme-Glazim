@@ -10,7 +10,7 @@ export function parseServer(e: TServersEntity) {
     } else if (e.online6) {
       return "IPV6"
     } else {
-      return "--"
+      return undefined
     }
   })()
   return {

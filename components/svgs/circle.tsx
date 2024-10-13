@@ -20,7 +20,7 @@ export default function SVGCircle(props: {
       strokeWidth="10"
     />
     <circle
-      className="origin-center -rotate-90"
+      className="origin-center -rotate-90 transition-all duration-300"
       cx="50%"
       cy="50%"
       r={radius.toString()}
