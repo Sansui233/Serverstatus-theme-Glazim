@@ -4,7 +4,6 @@
 
 ![Desktop Preview](./media/desktop.webp)
 
-[TOC]
 
 在使用主题之前，你需要先至少部署一个 serverstatus 服务端。
 
@@ -65,11 +64,17 @@ server {
 
 ### Vercel(TODO)
 
+### 使用 docker 和后端一起部署
+
+将以下项目的 web 目录替换为本仓库的 release 后，按项目说明部署 docker。
+
+- [cppla/ServerStatus](https://github.com/cppla/ServerStatus)
+- [zdz/ServerStatus-Rust](https://github.com/zdz/ServerStatus-Rust)
 
 
-## Build
+## Build Project
 
-Build with npm. 
+Build with npm/pnpm.
 
 ```
 git clone https://github.com/sansui233/serverstatus-theme-glazim && cd serverstatus-theme-glazim
@@ -83,7 +88,7 @@ And place your `stats.json` into `./public/json/`, then run
 pnpm run build
 ```
 
-The site is in the `out` directory.
+The site is in the `out` directory. Run `pnpm start`.
 
 
 ## License
