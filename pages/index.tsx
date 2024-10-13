@@ -5,8 +5,8 @@ import { TServersEntity, TStat } from "@/utils/type"
 import { ArrowDown, ArrowUp, Server } from "lucide-react"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 
-// DONE 滚动
-// TODO svg过渡动画
+// DONE 联合滚动
+// DONE svg过渡动画
 // TODO 点击的详情 Model 带图片保存与分享按钮（草）
 // TODO 其他主题切换（pr 时再做）
 export default function Home() {
