@@ -6,14 +6,14 @@
 
 [TOC]
 
-## 部署
-
-此主题仅为前端，你需要先至少部署一个 serverstatus 服务端。
+在使用主题之前，你需要先至少部署一个 serverstatus 服务端。
 
 - [cppla/ServerStatus](https://github.com/cppla/ServerStatus)
 - [zdz/ServerStatus-Rust](https://github.com/zdz/ServerStatus-Rust)
 
-### 服务器：nginx 部署 + 数据反代
+## 主题部署
+
+### nginx 部署 + 数据反代
 
 解压前端主题至 nginx 网页目录，并将 `stats.json` 反代到 `/json/stats.json`。
 
@@ -29,7 +29,7 @@ vim /etc/nginx/sites-enabled/serverstatus.conf
 nginx -s reload
 ```
 
-对应 nginx 配置文件：
+对应 nginx 配置文件，部署在 443 端口。
 
 ```
 server {
@@ -58,6 +58,8 @@ server {
 
 }
 ```
+
+重启 nginx 服务后即可访问。
 
 更多说明见 [zdz/ServerStatus-Rust](https://github.com/zdz/ServerStatus-Rust?tab=readme-ov-file#6-faq)。
 
