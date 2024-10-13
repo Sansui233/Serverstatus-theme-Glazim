@@ -2,7 +2,7 @@ import { CircleChart, TextBrText } from "@/components/charts"
 import { parseServer } from "@/utils/parse"
 import { throttle } from "@/utils/throttle"
 import { TServersEntity, TStat } from "@/utils/type"
-import { ArrowDown, ArrowUp, Server } from "lucide-react"
+import { ArrowDown, ArrowUp } from "lucide-react"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 
 // DONE 联合滚动
@@ -45,9 +45,14 @@ export default function Home() {
     <main className="sm:p-16 pb-4 pt-16 min-h-screen">
       <div className="w-fit mx-auto max-container-width">
         <div className="flex items-end mb-8">
-          <h1 className="text-2xl font-medium flex items-center -mb-05">
-            <Server size={"1em"} className="mr-2" />
-            <span>My Servers</span>
+          <h1 className="flex items-center -mb-05 ">
+            {/* <div className="rounded-lg bg-zinc-800 p-2" style={{ width: "35px", height: "35px" }} > */}
+            <svg className="mx-2" width="21" height="19" viewBox="0 0 21 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect y="10.6667" width="20.3636" height="7.75758" rx="3.87879" className="fill-zinc-400" />
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M3.87879 0C1.73659 0 0 1.73659 0 3.87879C0 6.02098 1.73659 7.75758 3.87878 7.75758H16.4848C18.627 7.75758 20.3636 6.02098 20.3636 3.87879C20.3636 1.73659 18.627 0 16.4849 0H3.87879ZM3.42834 5.87878C4.2172 5.87878 4.85669 5.28907 4.85669 4.56163C4.85669 3.83419 4.2172 3.24448 3.42834 3.24448C2.63949 3.24448 2 3.83419 2 4.56163C2 5.28907 2.63949 5.87878 3.42834 5.87878Z" className="fill-zinc-400" />
+            </svg>
+            {/* </div> */}
+            <span className="font-medium text-2xl text-zinc-200">Serverstatus</span>
           </h1>
           <span className="text-13 text-zinc-400 ml-4">
             最近更新：{data ? updatedAt(parseInt(data.updated)) : updatedAt(0)}
@@ -55,7 +60,7 @@ export default function Home() {
         </div>
         {err && <div className="container bg-red-500 bg-opacity-20 p-4 rounded-2xl border border-red-500 border-opacity-40">
           <span className="text-red-600">错误：</span>
-          <span className="text-zinc-300">{err}</span>
+          <span className="text-zinc-200">{err}</span>
         </div>}
         <div>
           {!err && data?.servers && data.servers.map((d, i) => {
@@ -171,11 +176,11 @@ function ServerCard(props: {
 
   }, [reflist, idx])
 
-  return <div {...otherProps} className="rounded-2xl bg-zinc-900 px-6 py-4 my-4 min-h-16">
+  return <div {...otherProps} className="rounded-2xl bg-zinc-900 px-6 py-4 my-4 min-h-16 border border-zinc-800">
     {/* title */}
     <div className="flex items-center">
       <div className={"inline-block rounded-full w-2 h-2 mr-2" + (d.protocol ? " bg-green-500" : " bg-red-600")} />
-      <div className="font-bold">
+      <div className="font-bold text-zinc-200">
         {server.name}
       </div>
       {!d.protocol && <span className="ml-4 px-2 rounded-full text-13 bg-red-950 border border-red-900 text-red-400">离线</span>}
@@ -226,20 +231,21 @@ function ServerCard(props: {
       {d.protocol && <div className="flex-none grid grid-cols-4-auto grid-rows-2 grid-flow-col auto-cols-min gap-x-8 ml-8">
         {/* network */}
         <div className="row-span-2">
-          <div className="font-semibold text-lg text-zinc-100 mb-4">
+          <div className="font-semibold text-lg text-zinc-200 mb-2">
             网络
           </div>
           <div className="text-sm text-zinc-500">
             {([
-              ["上行速度", d.netUp, <ArrowUp key={"aru"} className="stroke-white mr-1" size={"1em"} />],
-              ["下行速度", d.netDown, <ArrowDown key={"ard"} className="stroke-white mr-1" size={"1em"} />]
+              ["上行速度", d.netUp, <ArrowUp key={"aru"} className="stroke-zinc-100 mr-1" size={"1em"} />],
+              ["下行速度", d.netDown, <ArrowDown key={"ard"} className="stroke-zinc-100 mr-1" size={"1em"} />]
             ] as const).map(([name, data, Icon], i) => (
 
-              <div className="last:mt-4" key={i}>
-                <div>{name}</div>
+              <div className="last:mt-2" key={i}>
+                <div className="text-zinc-400">{name}</div>
                 <div className="mt-1 flex items-center">
                   {Icon}
-                  {data ? <><span className="mr-1 text-zinc-300 inline-block text-right min-w-4ch">{data.value}</span>{data.unit}</> : "-"}/s
+                  {data ? <><span className="mr-1 text-zinc-300 inline-block text-right min-w-4ch">{data.value}</span>
+                    <span className="">{data.unit}</span></> : "-"}/s
                 </div>
               </div>
 
@@ -248,7 +254,7 @@ function ServerCard(props: {
         </div>
         {/* delay */}
         <div className="row-span-2">
-          <div className="font-semibold text-lg text-zinc-100 mb-4">
+          <div className="font-semibold text-lg text-zinc-200 mb-2">
             延迟/丢包
           </div>
           <div className="grid grid-cols-5-auto grid-rows-3 text-zinc-500 text-sm gap-y-1">
@@ -259,7 +265,7 @@ function ServerCard(props: {
                 ["联通", server.time_10010, server.ping_10010],
               ] as const).map(([name, delay, loss], i) => (
                 <React.Fragment key={i}>
-                  <div >{name}</div>
+                  <div className="text-zinc-400">{name}</div>
                   <div className={"ml-2 text-right mr-1 min-w-4ch " + delayColor(delay)}>{delay}</div>ms
                   <div className={"ml-2 text-right min-w-3ch " + lossColor(loss)}>{loss}</div>%
                 </React.Fragment>
@@ -274,10 +280,10 @@ function ServerCard(props: {
         ] as const).map(([name, up, down], i) => (
 
           <div className="row-span-2" key={i}>
-            <div className="font-semibold text-lg text-zinc-100 mb-4">{name}</div>
+            <div className="font-semibold text-lg text-zinc-200 mb-2">{name}</div>
             {([
-              [up, <ArrowUp key="aru" className="stroke-white mr-1" size={"1em"} />],
-              [down, <ArrowDown key="ard" className="stroke-white mr-1" size={"1em"} />]
+              [up, <ArrowUp key="aru" className="stroke-zinc-100 mr-1" size={"1em"} />],
+              [down, <ArrowDown key="ard" className="stroke-zinc-100 mr-1" size={"1em"} />]
             ] as const).map(([data, Icon], i) => (
 
               <div className="mt-1 flex items-center text-sm" key={i}>

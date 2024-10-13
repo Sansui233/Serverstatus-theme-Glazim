@@ -84,11 +84,14 @@ body {
     /* Firefox */
   }
 
-  .max-container-width {
+  .max-container-width {   
+    width: calc(100vw - 2rem);
+    
     @media (min-width: 640px) {
-      max-width: calc(100vw - 4rem);
+      width: calc(100vw - 8rem);
     }
-
-    max-width: calc(100vw - 2rem);
+    @media (min-width: 1024px){
+      width: min(972px, calc(100vw - 4rem));
+    }
   }
 }
