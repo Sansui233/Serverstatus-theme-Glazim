@@ -1,6 +1,10 @@
 # Glazim Theme
 
-这是一个暗色系的 Serverstatus 主题，圆角设计，~~适合装逼用~~。
+这是一个暗色系的 Serverstatus 主题，圆角设计，~~适合装逼用~~。使用 Next.js 与 Tailwind CSS 构建。
+
+![Desktop Preview](./media/desktop.webp)
+
+[TOC]
 
 ## 部署
 
@@ -55,8 +59,31 @@ server {
 }
 ```
 
-更多说明见[zdz/ServerStatus-Rust](https://github.com/zdz/ServerStatus-Rust?tab=readme-ov-file#6-faq)
+更多说明见 [zdz/ServerStatus-Rust](https://github.com/zdz/ServerStatus-Rust?tab=readme-ov-file#6-faq)。
 
-### Vercel
+### Vercel(TODO)
 
-TODO
+
+
+## Build
+
+Build with npm. 
+
+```
+git clone https://github.com/sansui233/serverstatus-theme-glazim && cd serverstatus-theme-glazim
+pnpm i
+pnpm start
+```
+
+And place your `stats.json` into `./public/json/`, then run
+
+```
+pnpm run build
+```
+
+The site is in the `out` directory.
+
+
+## License
+
+MIT License.
