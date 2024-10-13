@@ -5,7 +5,7 @@ export function throttle<T extends (...args: any) => any>(func: T, limit: number
   let lastResult: ReturnType<T>;
 
   return function (this: any): ReturnType<T> {
-    const args = arguments;
+    const args = arguments as unknown as any[];
     const context = this;
 
     if (!inThrottle) {

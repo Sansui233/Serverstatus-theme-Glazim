@@ -5,10 +5,10 @@ import { TServersEntity, TStat } from "@/utils/type"
 import { ArrowDown, ArrowUp, Server } from "lucide-react"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 
-// TODO 双列布局切换
-// TODO 其他主题切换
-// TODO 联合滚动
+// DONE 滚动
 // TODO svg过渡动画
+// TODO 点击的详情 Model 带图片保存与分享按钮（草）
+// TODO 其他主题切换（pr 时再做）
 export default function Home() {
 
   const [data, setData] = useState<TStat | null>(null)
@@ -16,19 +16,27 @@ export default function Home() {
   const refs = useRef<(HTMLDivElement | undefined | null)[]>([null, null, null])
 
   useEffect(() => {
-    fetch("/json/stats.json")
-      .then(resp => resp.json())
-      .then(data => {
-        setData(data)
-      }).catch(reason => {
-        setErr(reason)
-      })
+
+    const getData = () => {
+      fetch("/json/stats.json")
+        .then(resp => resp.json())
+        .then(data => {
+          setData(data)
+        }).catch(reason => {
+          setErr(reason)
+        })
+    }
+    const h = setInterval(getData, 1000)
+
+    return () => {
+      clearInterval(h)
+    }
   }, [])
 
   const updatedAt = useCallback((date: number) => {
     if (date == 0) return "从未.";
-    var seconds = Math.floor(((new Date()).getTime() - 1000 * date) / 1000);
-    var interval = Math.floor(seconds / 60);
+    const seconds = Math.floor(((new Date()).getTime() - 1000 * date) / 1000);
+    const interval = Math.floor(seconds / 60);
     return interval > 1 ? interval + " 分钟前" : "几秒前";
   }, [])
 
@@ -80,12 +88,14 @@ const syncScroll = (
 ) => {
   const scrollLeft = sourcedom.scrollLeft;
 
-  refList.current && refList.current.forEach((dom) => {
-    if (dom && dom !== sourcedom && dom.scrollLeft !== scrollLeft) {
-      dom.scrollLeft = scrollLeft;
-      console.debug("%% send in sync")
-    }
-  });
+  if (refList.current) {
+    refList.current.forEach((dom) => {
+      if (dom && dom !== sourcedom && dom.scrollLeft !== scrollLeft) {
+        dom.scrollLeft = scrollLeft;
+        console.debug("%% send in sync")
+      }
+    });
+  }
 };
 
 
@@ -117,7 +127,7 @@ function ServerCard(props: {
     const throttledScrollX = throttle((dom: HTMLDivElement, distance: number) => {
       // setScrollLeft(dom.scrollLeft + distance)
       dom.scrollLeft = dom.scrollLeft + distance
-      console.debug('&& debug sending', idx)
+      // console.debug('&& debug sending', idx)
     }, 100)
     const handleWheel = throttle((e: WheelEvent) => {
       if (dom && isMouseInside.current) {
@@ -132,10 +142,12 @@ function ServerCard(props: {
     window.addEventListener("wheel", handleWheel, { passive: false });
     return () => {
       window.removeEventListener("wheel", handleWheel)
-      dom && dom.removeEventListener('mouseenter', handleMouseEnter);
-      dom && dom.removeEventListener('mouseleave', handleMouseLeave);
+      if (dom) {
+        dom.removeEventListener('mouseenter', handleMouseEnter);
+        dom.removeEventListener('mouseleave', handleMouseLeave);
+      }
     }
-  }, [reflist])
+  }, [reflist, idx])
 
   // 被动 scroll 与 scroll 扩散
   // 其实这里是有可能和后面的事件监听无限制循环 trigger 的，设备越差越会有
@@ -146,10 +158,10 @@ function ServerCard(props: {
 
     const handleScroll = () => {
       // console.debug('&& debug receiving', idx)
-      requestAnimationFrame(() => syncScroll(dom, reflist))
+      syncScroll(dom, reflist)
 
     }
-    const throttled = throttle(handleScroll, 33)
+    const throttled = throttle(handleScroll, 30)
     dom.addEventListener('scroll', throttled)
 
     return () => {
@@ -217,8 +229,8 @@ function ServerCard(props: {
           </div>
           <div className="text-sm text-zinc-500">
             {([
-              ["上行", d.netUp, <ArrowUp className="stroke-white mr-1" size={"1em"} />],
-              ["下行", d.netDown, <ArrowDown className="stroke-white mr-1" size={"1em"} />]
+              ["上行", d.netUp, <ArrowUp key={"aru"} className="stroke-white mr-1" size={"1em"} />],
+              ["下行", d.netDown, <ArrowDown key={"ard"} className="stroke-white mr-1" size={"1em"} />]
             ] as const).map(([name, data, Icon], i) => (
 
               <div className="last:mt-4" key={i}>
@@ -262,8 +274,8 @@ function ServerCard(props: {
           <div className="row-span-2" key={i}>
             <div className="font-semibold text-lg text-zinc-100 mb-4">{name}</div>
             {([
-              [up, <ArrowUp className="stroke-white mr-1" size={"1em"} />],
-              [down, <ArrowDown className="stroke-white mr-1" size={"1em"} />]
+              [up, <ArrowUp key="aru" className="stroke-white mr-1" size={"1em"} />],
+              [down, <ArrowDown key="ard" className="stroke-white mr-1" size={"1em"} />]
             ] as const).map(([data, Icon], i) => (
 
               <div className="mt-1 flex items-center text-sm" key={i}>
