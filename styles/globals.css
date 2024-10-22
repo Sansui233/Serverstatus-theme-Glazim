@@ -25,6 +25,10 @@ body {
     font-size: 13px;
   }
 
+  .ml-2px {
+    margin-left: 2px;
+  }
+
   .-mb-05 {
     margin-bottom: -0.125rem;
   }

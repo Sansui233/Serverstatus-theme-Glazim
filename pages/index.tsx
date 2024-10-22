@@ -1,4 +1,4 @@
-import { ChartBlock, CircleChart, TextBrText } from "@/components/charts"
+import { ChartBlock, CircleChart, getColorclass, StatusDots, TextBrText } from "@/components/charts"
 import { parseServer } from "@/utils/parse"
 import { throttle } from "@/utils/throttle"
 import { TServersEntity, TStat } from "@/utils/type"
@@ -14,7 +14,8 @@ export default function Home() {
   const [data, setData] = useState<TStat | null>(null)
   const [err, setErr] = useState(null)
   const refs = useRef<(HTMLDivElement | undefined | null)[]>([null, null, null])
-  const [isModel, setModel] = useState<false | TServersEntity>(false)
+  const [modalIndex, setModalIndex] = useState<false | number>(false)
+  const [modalData, setModalData] = useState<TServersEntity | undefined>(undefined)
 
   useEffect(() => {
 
@@ -24,6 +25,10 @@ export default function Home() {
         .then(resp => resp.json())
         .then(data => {
           setData(data)
+          if (modalIndex !== false) {
+            const l = (data as TStat)?.servers
+            if (l) setModalData(l[modalIndex])
+          }
         }).catch(reason => {
           setErr(reason)
         })
@@ -33,7 +38,7 @@ export default function Home() {
     return () => {
       clearInterval(h)
     }
-  }, [])
+  }, [modalIndex])
 
   const updatedAt = useCallback((date: number) => {
     if (date == 0) return "从未.";
@@ -66,23 +71,29 @@ export default function Home() {
         <div>
           {!err && data?.servers && data.servers.map((d, i) => {
             return <ServerCard server={d} key={i} idx={i}
-              reflist={refs} onClick={() => isModel === false ? setModel(d) : d.name === isModel.name ? setModel(false) : setModel(d)} />
+              reflist={refs} onClick={() => {
+                if (modalIndex === i) {
+                  setModalIndex(false)
+                  setModalData(undefined)
+                  return
+                } else {
+                  // if(isModal === false || isModal !== i)
+                  setModalIndex(i)
+                  setModalData(d)
+                  return
+                }
+              }
+              } />
           })}
         </div>
       </div>
-      {isModel !== false && <ServerModel data={isModel} closeModel={() => setModel(false)} />}
+      {modalIndex !== false && modalData && <ServerModel data={modalData} closeModel={() => setModalIndex(false)} />}
     </main>
   );
 }
 
 
-function getColorclass(value: number | null | undefined, break1: number, break2: number) {
-  if (typeof value !== "number" && !value) return ""
-  return value < break1
-    ? "text-green-500" : value >= break2
-      ? "text-red-500"
-      : "text-yellow-500"
-}
+
 const delayColor = (delay: number | null | undefined) => getColorclass(delay, 100, 300)
 const lossColor = (loss: number | null | undefined) => getColorclass(loss, 10, 20)
 
@@ -185,6 +196,7 @@ function ServerCard(props: {
         {server.name}
       </div>
       {!d.protocol && <span className="ml-4 px-2 rounded-full text-13 bg-red-950 border border-red-900 text-red-400">离线</span>}
+      <StatusDots server={server} d={d} />
     </div>
     {/* content */}
     <div ref={dom => { reflist.current[idx] = dom }} className="flex mt-4 ml-4 overflow-x-auto scrollbar">
@@ -317,7 +329,6 @@ function ServerModel(props: {
   }
   const d = parseServer(server)
 
-  console.debug("data", server)
   return <div className={"fixed top-0 right-0 max-w-md h-full pd:my-4 bg-zinc-900 border-zinc-800 border transition-all duration-300 "
     + (isBeforeClose ? "slide-out-right" : "slide-in-right")}
     {...otherprops}>
@@ -330,6 +341,7 @@ function ServerModel(props: {
             {server.name}
           </div>
           {!d.protocol && <span className="ml-4 px-2 rounded-full text-13 bg-red-950 border border-red-900 text-red-400">离线</span>}
+          <StatusDots server={server} d={d} />
         </div>
         <div className="px-4 my-4">
           <div className="flex">

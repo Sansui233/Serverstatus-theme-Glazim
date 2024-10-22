@@ -2,7 +2,7 @@ import { Head, Html, Main, NextScript } from "next/document";
 
 export default function Document() {
   return (
-    <Html lang="en">
+    <Html lang="zh" className="antialiased bg-zinc-950  text-zinc-100 tabular-nums">
       <Head>
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
         <link rel="icon" type="image/png" href="/favicon-48x48.png" sizes="48x48" />

@@ -1,3 +1,5 @@
+import { parseServer } from "@/utils/parse";
+import { TServersEntity } from "@/utils/type";
 import { HTMLAttributes } from "react";
 import SVGCircle from "./svgs/circle";
 
@@ -66,4 +68,49 @@ export function ChartBlock({ title, twColor = "bg-zinc-600", children, ...otherp
     </div>
     {children}
   </div>
+}
+
+export function getColorclass(value: number | null | undefined, break1: number, break2: number) {
+
+  if (typeof value !== "number" && !value) return "text-zinc-500"
+  return value < break1 ? "text-green-500"
+    : value >= break2 ? "text-red-500"
+      : "text-yellow-500"
+}
+
+export function getBgclass(value: number | null | undefined, break1: number, break2: number) {
+
+  if (typeof value !== "number" && !value) return "bg-zinc-500"
+  return value < break1 ? "bg-green-500"
+    : value >= break2 ? "bg-red-500"
+      : "bg-yellow-500"
+}
+
+
+export function StatusDots({ server, d }: { server: TServersEntity, d: ReturnType<typeof parseServer> }) {
+  return <>
+    {d.protocol && <span className="inline-block ml-4">
+      {(
+        [
+          d.cpuUsage,
+          d.memoryUsage,
+          server.load_1,
+          d.hddUsage,
+        ]
+      ).map((v, i) => (
+        <span className={"inline-block w-2 h-2 rounded-full ml-2px " + getBgclass(v, 0.6, 0.8)} key={i} />
+      ))}
+    </span>}
+    {d.protocol && <span className="inline-block ml-2">
+      {(
+        [
+          server.ping_189,
+          server.ping_10086,
+          server.ping_10010
+        ]
+      ).map((v, i) => (
+        <span className={"inline-block w-2 h-2 rounded-full ml-2px " + getBgclass(v, 10, 20)} key={i} />
+      ))}
+    </span>}
+  </>
 }
