@@ -20,10 +20,10 @@ export function TextBrText(props: {
 
 
 export function CircleChart({ name, value, format = "percentage", textinfo, ...otherprops }: {
-  name: string,
+  name?: string,
   value?: number,
   format?: "text" | "percentage",
-  textinfo: string | number | undefined | null,
+  textinfo?: string | number | null,
 } & HTMLAttributes<HTMLDivElement>) {
 
   let percentage = 0;
@@ -44,7 +44,7 @@ export function CircleChart({ name, value, format = "percentage", textinfo, ...o
     ? strokeDasharray * (1 - value)
     : strokeDasharray
 
-  return <div {...otherprops} className="text-center text-zinc-400 text-13 mt-4 mr-4" >
+  return <div {...otherprops} className={"text-center text-zinc-400 text-13 mt-4 mr-4 " + otherprops.className} >
     <div className="mx-auto mb-1">
       <SVGCircle radius={radius} strokeDasharray={strokeDasharray} strokeDashoffset={strokeDashoffset}
         strokeColor={strokeColor} dataAngle={percentage} text={value} textFormat={format} />
@@ -53,4 +53,17 @@ export function CircleChart({ name, value, format = "percentage", textinfo, ...o
     <div>{textinfo}</div>
   </div>
 
+}
+
+export function ChartBlock({ title, twColor = "bg-zinc-600", children, ...otherprops }: {
+  title: string
+  twColor?: string
+} & HTMLAttributes<HTMLDivElement>) {
+  return <div className={"min-w-16 " + otherprops.className} {...otherprops}>
+    <div className="flex items-center">
+      <div className={"inline-block mr-2 w-2 h-4 rounded-full " + twColor}></div>
+      <span className="text-sm text-zinc-400">{title}</span>
+    </div>
+    {children}
+  </div>
 }
